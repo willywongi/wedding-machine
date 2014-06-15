@@ -1,0 +1,77 @@
+<html>
+	<head>
+	<title>My first Three.js app</title>
+	<style>canvas { width: 100%; height: 100% }</style>
+</head>
+<body>
+<script src="/three.js"></script>
+<script src="/jquery.js"></script>
+<script>
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+var light = new THREE.DirectionalLight( 0xffffff );
+light.position.set( 0, 1, 1 ).normalize();
+scene.add(light);
+ 
+var renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+
+var slots = [],
+	material = new THREE.MeshPhongMaterial({
+				map: THREE.ImageUtils.loadTexture('slot.png')
+			}),
+	simboli = [
+		'sette',
+		'mela',
+		'limone',
+		'win',
+		'ciliegie',
+		'campana',
+		'cocomera',
+		'bar'],
+	UVMap = [];
+
+$.each(simboli, function(index, simbolo) {
+	var h1 = 1 / 7 * index,
+		h2 = 1 / 7 * (index + 1);
+	UVMap.push([new THREE.Vector2(0, h1), new THREE.Vector2(1, h1),
+				 new THREE.Vector2(1, h2), new THREE.Vector2(0, h2)]);
+});
+
+for (var i = 0, j = 3; i<j; i++) {
+	var geometry = new THREE.CylinderGeometry(100, 100, 100, 8, 1, false),
+		cylinder = new THREE.Mesh(geometry, material);
+	/*
+	cfr.: http://solutiondesign.com/webgl-and-three-js-texture-mapping/
+	The faceVertexUvs property of geometry is an array of arrays that contains 
+	the coordinate mapping for each face of the geometry. Since we are mapping
+	to a cube you may be wondering why there are 12 faces in the array. The reason
+	is that each face of the cube is actually created from 2 triangles. So we 
+	must map each triangle individually. In the scenario above where we simply 
+	handed Three.js a single material, it automatically broke our texture down 
+	into triangles and mapped it to each face for us.	
+	*/
+	geometry.faceVertexUvs[0] = [];
+	$.each(UVMap, function(index, map) {
+		geometry.faceVertexUvs[0][index] = [map[0], map[1], map[3]];
+		geometry.faceVertexUvs[0][index + 1] = [map[1], map[2], map[3]];
+	});
+	cylinder.rotation.z = Math.PI / 2;
+	scene.add(cylinder);
+	slots.push(cylinder);
+}
+slots[0].position.x -= 125;
+slots[2].position.x += 125;
+
+camera.position.z = 400;
+
+function render() {
+	requestAnimationFrame(render);
+	renderer.render(scene, camera);
+	slots[1].rotation.x += 0.15;
+} 
+render();
+</script>
+</body>
+</html>

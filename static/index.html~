@@ -1,0 +1,187 @@
+<html>
+<head>
+	<script src="jquery.js"></script>
+	<script>
+		var posizioni = [
+			'sette',
+			'bar',
+			'salame',
+			'campana',
+			'ciliegie',
+			'limone',
+			'mela'
+		];
+		var tiro = 0;
+			rotante = false;
+		
+		function getRandomInt (min, max) {
+		    return Math.floor(Math.random() * (max - min + 1)) + min;
+		}
+		function appurl() {
+			var appPath = document.getElementById('appPath').value;
+			document.getElementById('hiddenLoader').src = "appurl://"+appPath;
+		}
+		function startMachine() {
+			console.log(tiro);
+			$('div#machine > div').attr('class', '');
+			if(!rotante) {
+				$('div#machine > div').toggleClass('ruota');
+				rotante = true;
+				setTimeout(function() {
+					if(rotante) {
+						$('div#machine > div').toggleClass('ruota');
+						var vittoria = false;
+						if(tiro > 3) {
+							vittoria = true;
+							console.log('vittoria forzata');
+						} else if(getRandomInt(0,3) == 0) vittoria = true;
+						
+						if(vittoria) {
+							$('div#machine > div').addClass('win');
+							console.log('vittoria!');
+							tiro = 0;
+						} else {
+							$('div#a').addClass(posizioni[getRandomInt(0, posizioni.length-1)]);
+							$('div#b').addClass(posizioni[getRandomInt(0, posizioni.length-1)]);
+							$('div#c').addClass(posizioni[getRandomInt(0, posizioni.length-1)]);
+							tiro++;
+						}
+						rotante = false;
+					}
+				}, 1000);
+			}
+		}
+	</script>
+	<script>
+		$(function() {
+			$("#toggle-motor").on('click', function() {
+				$.post('/toggle-motor'); 
+			});
+			$("#pulse-motor").on('click', function() {
+				$.post('/pulse-motor');
+			});
+			var slots = $('#machine > div');
+			
+			$.each(slots, function(index, element) {
+				console.log(element);
+				element.addEventListener('animationend', function() {
+					console.log('animationend', this);
+					$(this).removeClass('ruota');
+					$(this).addClass('sette');
+					
+				}, true);
+			});
+			
+			function spinSlot() {
+				slots.addClass('ruota');
+			}
+			$('#pull-lever').on('click', function() {
+				spinSlot();
+			});
+		});
+		
+	</script>
+	<style>
+		@keyframes spin {
+          0%   { background-position: 0 0, 0 -640px; }
+          100%  { background-position: 0 0, 0 0; }
+        }
+		#machine {
+			width: 360px;
+			margin: auto;
+			padding: 20px;
+			overflow: hidden;
+			background-color: #333;
+			border-radius: 10px;
+		}
+		#machine > div {
+			float: left;
+			width: 100px;
+			margin: 10px;
+			height: 160px;
+			background-color: #fff;
+			background-image: linear-gradient(rgba(0,0,0,1), rgba(255,255,255,0), rgba(0,0,0,1)),  url("slot.png");
+			border-radius: 5px;
+			box-shadow: 0 0 10px #000 inset;
+		}
+		
+		#machine > #a {
+			transition: background-position .7s;
+		}
+		#machine > #b {
+			transition: background-position 1.2s;
+		}
+		#machine > #c {
+			transition: background-position 1.6s;
+		}
+		.ruota {
+			animation-name: spin;
+			animation-duration: .7s;
+			animation-iteration-count: 2;
+			animation-timing-function: linear;
+		}
+		div.sette {
+			background-position: 0 0, 0 40px;
+		}
+		div.bar {
+			background-position: 0 0, 0 120px;
+		}
+		div.salame {
+			background-position: 0 0, 0 200px;
+		}
+		div.campana {
+			background-position: 0 0, 0 280px;
+		}
+		div.ciliegie {
+			background-position: 0 0, 0 360px;
+		}
+		div.win {
+			background-position: 0 0, 0 440px;
+		}
+		div.limone {
+			background-position: 0 0, 0 520px;
+		}
+		div.mela {
+			background-position: 0 0, 0 600px;
+		}
+		
+		/*#machine:target > div {
+			background-position: 0, 0 -840px;
+			animation: none;
+		}
+		#machine:target > #a {
+			transition: background-position .7s;
+		}
+		#machine:target > #b {
+			transition: background-position 1.2s;
+		}
+		#machine:target > #c {
+			transition: background-position 1.6s;
+		}*/
+		
+		/* setting visibility */
+        /*#machine + #navigation > a[href="#machine"] { display:block; }
+        #machine + #navigation > a[href="#reset"] { display:none; }
+        #machine:target + #navigation > a[href="#machine"] { display:none; }
+        #machine:target + #navigation > a[href="#reset"] { display:block; }*/
+	</style>
+</head>
+<body>
+
+<button id="toggle-motor">On/Off</button>
+<button id="pulse-motor">Impulso</button>
+<button id="pull-lever">Tira la leva</button>
+<hr />
+Slot machine
+
+<div id="machine">
+    <div id="a" class="bar">&nbsp;</div>
+    <div id="b" class="bar">&nbsp;</div>
+    <div id="c" class="bar">&nbsp;</div>
+</div>
+
+<!-- <button onclick="startMachine()">Tira la leva</button> -->
+
+</body>
+
+</html>

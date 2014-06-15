@@ -1,0 +1,11 @@
+{
+  "name": "wedding-machine",
+  "description": "prototipo di script di controllo della slotmachine dei confetti",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "~4.4.1",
+	"duino": "~0.0.9"
+  }
+}
+
