@@ -1,16 +1,29 @@
 	// https://github.com/ecto/duino
-var Duino = require('duino'),
+var Duino,
+	/* Lo schema per fare andare il motorino:
+		http://www.dummies.com/how-to/content/how-to-spin-a-dc-motor-with-the-arduino.html
+	*/
+	board,
 	// http://expressjs.com/guide.html
 	express = require('express'),
 	// http://nodejs.org/api/child_process.html
 	child_process = require('child_process'),
-	/* Lo schema per fare andare il motorino:
-		http://www.dummies.com/how-to/content/how-to-spin-a-dc-motor-with-the-arduino.html
-	*/
-	board = new Duino.Board({'device': 'ttyACM'}),
 	app = express(),
 	MOTOR_PIN = 9;
+
+try {
+	duino = require('duino');
+	board = new Duino.Board({'device': 'ttyACM'})
+} catch(e) {
+	console.log('Cannot connect to the Arduino board');
+	board = {
+		digitalWrite: function() {
+			console.log('No-op: no Arduino board found during init');
+		}
+	}
 	
+}
+
 var motor = {
 	// 
 	status: false,
