@@ -62,6 +62,9 @@ app.get('/slot.png', function(req, res) {
 app.get('/three.js', function(req, res) {
 	res.sendfile('static/three.min.js');
 });
+app.get('/tween.js', function(req, res) {
+	res.sendfile('node_modules/tween.js/index.js');
+});
 
 
 app.post('/toggle-motor', function(req, res) {
