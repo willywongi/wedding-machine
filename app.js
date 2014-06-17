@@ -50,22 +50,18 @@ app.get('/', function(req, res) {
 app.get('/3d', function(req, res) {
 	res.sendfile('static/index3.html');
 });
-app.get('/jquery.js', function(req, res) {
-	res.sendfile('node_modules/jquery/dist/cdn/jquery-2.1.1.min.js');
-});
 app.get('/slot.png', function(req, res) {
 	res.sendfile('static/slot-opaque.png');
 });
-/* I removed three.js from the dependencies list because npm version seems outdated. 
-	cfr. package.json and fetch-threejs.js
-*/
+app.get('/jquery.js', function(req, res) {
+	res.sendfile('bower_components/jquery/index.js');
+});
 app.get('/three.js', function(req, res) {
-	res.sendfile('static/three.min.js');
+	res.sendfile('bower_components/threejs/index.js');
 });
 app.get('/tween.js', function(req, res) {
-	res.sendfile('node_modules/tween.js/index.js');
+	res.sendfile('bower_components/tweenjs/index.js');
 });
-
 
 app.post('/toggle-motor', function(req, res) {
 	motor.toggle();

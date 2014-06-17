@@ -5,13 +5,10 @@
   "private": true,
   "dependencies": {
     "express": "~4.4.1",
-	"duino": "~0.0.9",
-	"jquery": "~2.1.1",
-	"tween": "0.14.0"
+	"duino": "~0.0.9"
   },
   "scripts": {
-  	"start": "node app.js",
-  	"prepublish": "node fetch-threejs.js"
+  	"start": "node app.js"
   }
 }
 
