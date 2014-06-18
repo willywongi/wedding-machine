@@ -89,7 +89,7 @@ Slot.prototype._rotate = function(to, freeRotation, delay) {
 	
 	if (freeRotation) {
 		// TODO: don't rewind it back, just go to the nearest.
-		target.x = to;
+		target.x = to + this.baseRotation;
 	} else {
 		// It should do two complete rotation anyway.
 		if (rotation.x < DEG360) {
@@ -135,8 +135,8 @@ Slot.prototype.startDemo = function(delay) {
 		faceIndex = SYMBOLS.indexOf(face);
 	this.on('rotationEnd', function(e, x) {
 		if (this._demoing) {
-			faceIndex++
-			this.show(SYMBOLS[faceIndex % SYMBOLS.length], 500);
+			faceIndex++;
+			this._rotate(Slot.symbols[SYMBOLS[faceIndex % SYMBOLS.length]] || 0, true, 500);
 		}
 	}, this)
 	this.show(face, delay);
@@ -174,6 +174,12 @@ var Machine = {
 	},
 	reset: function() {
 		$.each(Machine.slots, function(i, slot) { slot.reset(); });
+	},
+	startDemo: function() {
+		$.each(Machine.slots, function(i, slot) { slot.startDemo(750 * i); });
+	},
+	stopDemo: function() {
+		$.each(Machine.slots, function(i, slot) { slot.stopDemo(); });
 	}
 }
 

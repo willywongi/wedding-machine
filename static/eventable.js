@@ -11,7 +11,11 @@
 			return obj[key];
 		},
 		/* Rudimentary event system */
-		Eventable = function() { this._events = {}; };
+		Eventable = function() {};
+	
+	Eventable.prototype._getSubs = function(evtName) {
+		return setDefault(setDefault(setDefault(this, "_events", {}), evtName, {}), 'subscribers', []);
+	};
 	
 	Eventable.prototype.on = function(evtName, callback, scope) {
 		/* React (callback, scope) to a certain event (evtName).
@@ -21,7 +25,7 @@
 				e.prevented = 1; // blocks the defaultFn.
 			});
 		*/
-		var subs = setDefault(setDefault(this._events, evtName, {}), 'subscribers', []);
+		var subs = this._getSubs(evtName);
 		if (scope) {
 			subs.push(callback.bind(scope));
 		} else {
@@ -30,7 +34,7 @@
 	};
 	Eventable.prototype.removeListener = function(evtName, subscriber) {
 		/* Remove the subscriber */
-		var subs = setDefault(setDefault(this._events, evtName, {}), 'subscribers', []);
+		var subs = this._getSubs(evtName);
 		subs.splice(subs.indexOf(subscriber), 1);
 		return this;
 	};
@@ -45,9 +49,10 @@
 	Eventable.prototype.emit = function(evtName /*[args, ...]*/ ) {
 		/* Fire a certain event. Subscribers will be called with 
 			the event facade as first argument and any subsequent argument passed here. */
-		var args = Array.prototype.slice.call(arguments, 1);
-		if (owns(this._events, evtName)) {
-			var evt = this._events[evtName],	
+		var args = Array.prototype.slice.call(arguments, 1),
+			events = setDefault(this, "_events", {});
+		if (owns(events, evtName)) {
+			var evt = events[evtName],	
 				subs = evt.subscribers || [],
 				facade = {args: args};
 			args.unshift(facade)
@@ -76,12 +81,12 @@
 		if (owns(options, 'scope') && evt.defaultFn) {
 			evt.defaultFn.bind(options.scope);
 		}
-		this._events[evtName] = evt
+		setDefault(this, "_events", {})[evtName] = evt
 	};
 	Eventable.mixin = function(destObject) {
 		/* Make your objects Eventable */
-		var props = ['on', 'once', 'removeListener', 'emit', 'publish'],
-			i = 0, j = 4;
+		var props = ['on', 'once', 'removeListener', 'emit', 'publish', '_getSubs'],
+			i = 0, j = props.length;
 		for (; i < j; i++) {
 			if (typeof destObject === 'function') {
 				destObject.prototype[props[i]] = Eventable.prototype[props[i]];
