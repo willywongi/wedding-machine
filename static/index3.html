@@ -13,6 +13,8 @@
 // Constants
 var SLOTS = [],
 	SYMBOLS = ["bar", "cocomera", "campana", "ciliegie", "win", "limone", "mela", "sette"],
+	// The cylinder will have n faces where n = SYMBOLS.length * FACE_MULTIPLIER.
+	FACE_MULTIPLIER = 3,
 	DEG360 = Math.PI * 2,
 	ROTATION_DURATION = 6000,
 	width = 640,
@@ -39,11 +41,16 @@ var material = new THREE.MeshPhongMaterial({
 	UVMap = [];
 
 $.each(SYMBOLS, function(index, simbolo) {
-	var m = SYMBOLS.length,
-		h1 = 1 / m * index,
-		h2 = 1 / m * (index + 1);
-	UVMap.push([new THREE.Vector2(0, h1), new THREE.Vector2(1, h1),
-				 new THREE.Vector2(1, h2), new THREE.Vector2(0, h2)]);
+	var m = SYMBOLS.length * FACE_MULTIPLIER,
+		h1, h2, k, i;
+	// split each symbol on $FACE_MULTIPLIER faces.
+	for (i = 0; i < FACE_MULTIPLIER; i++) {
+		k = (index * FACE_MULTIPLIER) + i;
+		h1 = 1 / m * k;
+		h2 = 1 / m * (k + 1);
+		UVMap.push([new THREE.Vector2(0, h1), new THREE.Vector2(1, h1),
+					 new THREE.Vector2(1, h2), new THREE.Vector2(0, h2)]);
+	}
 });
 
 /* Single logic slot. */
@@ -139,7 +146,7 @@ var Machine = {
 
 /* Meshes (the 3d element of the slots) */
 for (var i = 0, j = 3; i<j; i++) {
-	var geometry = new THREE.CylinderGeometry(150, 150, 150, SYMBOLS.length, 1, true),
+	var geometry = new THREE.CylinderGeometry(150, 150, 150, SYMBOLS.length * FACE_MULTIPLIER, 1, true),
 		cylinder = new THREE.Mesh(geometry, material);
 
 	/*
