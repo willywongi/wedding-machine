@@ -45,13 +45,13 @@ var motor = {
 
 
 app.get('/', function(req, res) {
-	res.sendfile('static/index.html');
-});
-app.get('/3d', function(req, res) {
 	res.sendfile('static/index3.html');
 });
 app.get('/slot.png', function(req, res) {
 	res.sendfile('static/slot-opaque.png');
+});
+app.get('/idle-music.ogg', function(req, res) {
+	res.sendfile('static/idle-music3.ogg');
 });
 app.get('/jquery.js', function(req, res) {
 	res.sendfile('bower_components/jquery/index.js');

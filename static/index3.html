@@ -2,10 +2,22 @@
 	<head>
 	<title>Wedding Machine</title>
 	<style>
-	html, body { margin: 0; padding: 0; }
-	canvas { width: 640px; height: 480px; }</style>
+	html, body { margin: 0; padding: 0; 
+	background-color: #000;
+	}
+	#slotmachine {
+		width: 640px; height: 480px;
+		position: absolute;
+		left: 50%;
+		margin-left: -320px;
+	}
+	h1 { color: #fff; text-align: center; }
+	
+	</style>
 </head>
 <body>
+<h1>Premi il pulsante per iniziare a giocare!</h1>
+<audio src="/idle-music.ogg" loop autoplay></audio>
 <script src="/three.js"></script>
 <script src="/tween.js"></script>
 <script src="/jquery.js"></script>
@@ -33,6 +45,7 @@ scene.add(light);
 camera.position.z = 400;
  
 renderer.setSize(width, height);
+renderer.domElement.id = "slotmachine";
 document.body.appendChild(renderer.domElement);
 
 /* Material */
@@ -178,11 +191,22 @@ var Machine = {
 	startDemo: function() {
 		$.each(Machine.slots, function(i, slot) { slot.startDemo(750 * i); });
 	},
-	stopDemo: function() {
-		$.each(Machine.slots, function(i, slot) { slot.stopDemo(); });
+	stopDemo: function(callback, scope) {
+		var stopSignal = 3,
+			stopStatus = 0;
+		$.each(Machine.slots, function(i, slot) { 
+			slot.stopDemo();
+			slot.on('rotationEnd', function(x) {
+				stopStatus += i;
+				if (i == stopSignal) {
+					callback.call(scope || Machine);
+				}
+			}); 
+		});
 	}
 }
 
+Eventable.mixin(Machine);
 
 /* Meshes (the 3d element of the slots) */
 for (var i = 0, j = 3; i<j; i++) {
@@ -219,6 +243,11 @@ function render(timestamp) {
 	TWEEN.update();
 }
 render();
+
+Machine.startDemo();
+
+
+
 </script>
 </body>
 </html>
