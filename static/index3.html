@@ -9,6 +9,7 @@
 <script src="/three.js"></script>
 <script src="/tween.js"></script>
 <script src="/jquery.js"></script>
+<script src="/eventable.js"></script>
 <script>
 // Constants
 var SLOTS = [],
@@ -58,7 +59,11 @@ var Slot = function(cylinder) {
 	this.baseRotation = DEG360 / (SYMBOLS.length * 2)
 	this.cylinder = cylinder;
 	this.cylinder.rotation.x = this.baseRotation;
+	this._moving = false;
 }
+
+Eventable.mixin(Slot);
+
 
 Slot.symbols = {
 	bar: 0,  // DEG360 / 8 (faces) * 0 (index)
@@ -76,6 +81,7 @@ Slot.prototype._rotate = function(to, freeRotation, delay) {
 		if "freeRotation" is true rotation can occour in
 		both ways;*/
 	var cylinder = this.cylinder,
+		self = this,
 		rotation = {x: cylinder.rotation.x},
 		target = {x: cylinder.rotation.x},
 		delay = delay || 0,
@@ -98,9 +104,14 @@ Slot.prototype._rotate = function(to, freeRotation, delay) {
 				.onUpdate(function() {
 					cylinder.rotation.x = rotation.x;
 				})
+				.onComplete(function() {
+					self._moving = false;
+ 					self.emit('rotationEnd', rotation.x);
+				})
 				.easing(TWEEN.Easing.Elastic.Out)
 				.delay(delay)
 				.start();
+	this._moving = true;
 	console.log('Created tween from ' + rotation.x + ' to ' + target.x);
 }
 
@@ -111,6 +122,29 @@ Slot.prototype.reset = function() {
 
 Slot.prototype.show = function(symbolName, delay) {
 	this._rotate(Slot.symbols[symbolName] || 0, false, delay);
+}
+
+Slot.getRandomFace = function() {
+	return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+}
+
+Slot.prototype.startDemo = function(delay) {
+	// The slot takes a spin to a random face, and then start spinning slowly through the faces.
+	this._demoing = true;
+	var face = Slot.getRandomFace(),
+		faceIndex = SYMBOLS.indexOf(face);
+	this.on('rotationEnd', function(e, x) {
+		if (this._demoing) {
+			faceIndex++
+			this.show(SYMBOLS[faceIndex % SYMBOLS.length], 500);
+		}
+	}, this)
+	this.show(face, delay);
+}
+
+Slot.prototype.stopDemo = function() {
+	// this should end the loop
+	this._demoing = false;
 }
 
 /* The Machine, a singleton collecting the logical slots. */

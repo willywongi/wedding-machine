@@ -62,6 +62,9 @@ app.get('/three.js', function(req, res) {
 app.get('/tween.js', function(req, res) {
 	res.sendfile('bower_components/tweenjs/index.js');
 });
+app.get('/eventable.js', function(req, res) {
+	res.sendfile('static/eventable.js');
+});
 
 app.post('/toggle-motor', function(req, res) {
 	motor.toggle();
