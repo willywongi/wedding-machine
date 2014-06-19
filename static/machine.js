@@ -44,7 +44,7 @@ $.each(SYMBOLS, function(index, simbolo) {
 
 /* Single logic slot. */
 var Slot = function(cylinder) {
-	this.baseRotation = DEG360 / (SYMBOLS.length * 2);
+	this.baseRotation = DEG360 / (SYMBOLS.length * 2);  // The slight rotation that allow the symbol to be centered.
 	this.cylinder = cylinder;
 	this.cylinder.rotation.x = this.baseRotation;
 	this._moving = false;
@@ -214,9 +214,9 @@ for (var i = 0, j = 3; i<j; i++) {
 	cylinder.rotation.z = Math.PI / 2;
 	scene.add(cylinder);
 	Machine.addSlot(new Slot(cylinder));
-	// first cylinder: x = -200
+	// first cylinder: x = -155
 	// second: x = 0
-	// third: x = +200
+	// third: x = +155
 	cylinder.position.x += 155 * (i - 1);
 }
 
