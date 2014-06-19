@@ -106,28 +106,28 @@ Slot.prototype._rotate = function(to, freeRotation, delay) {
 
 Slot.prototype.reset = function() {
 	var zero = Math.floor(this.cylinder.rotation.x / DEG360) * DEG360;
-	this._rotate(zero, true, 0);
+	return this._rotate(zero, true, 0);
 }
 
 Slot.prototype.show = function(symbolName, delay) {
-	this._rotate(Slot.symbols[symbolName] || 0, false, delay);
+	return this._rotate(Slot.symbols[symbolName] || 0, false, delay);
 }
 
 Slot.getRandomFace = function() {
 	return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
 }
 
+Slot.prototype._demoCallback = function(e, x) {
+	this.faceIndex++;
+	this._rotate(Slot.symbols[SYMBOLS[this.faceIndex % SYMBOLS.length]] || 0, true, 500);
+}
+
 Slot.prototype.startDemo = function(delay) {
 	// The slot takes a spin to a random face, and then start spinning slowly through the faces.
+	var face = Slot.getRandomFace();
 	this._demoing = true;
-	var face = Slot.getRandomFace(),
-		faceIndex = SYMBOLS.indexOf(face);
-	this.on('rotationEnd', function(e, x) {
-		if (this._demoing) {
-			faceIndex++;
-			this._rotate(Slot.symbols[SYMBOLS[faceIndex % SYMBOLS.length]] || 0, true, 500);
-		}
-	}, this)
+	this.faceIndex = SYMBOLS.indexOf(face);
+	this.on('rotationEnd', this._demoCallback.bind(this));
 	this.show(face, delay);
 }
 
@@ -135,7 +135,9 @@ Slot.prototype.stopDemo = function() {
 	// this should end the loop
 	this._demoing = false;
 	var slot = this;
+	this.removeListener('rotationEnd', this._demoCallback);
 	return new RSVP.Promise(function(resolve, reject) {
+		console.log('stopping demo mode');
 		slot.once('rotationEnd', resolve);
 	});
 }
@@ -146,24 +148,20 @@ var Machine = {
 	addSlot: function(slot) {
 		Machine.slots.push(slot);
 	},
-	loosingRolls: 0,
-	roll: function(forceWin) {
-		var win = (forceWin) ? true : Machine.loosingRolls % 3 > 1;
-		
-		if (win) {
-			var face = Math.floor(Math.random() * SYMBOLS.length);
-			$.each(Machine.slots, function(i, slot) {
-				slot.show(SYMBOLS[face], /* delay */ i * 100);
-			});
-			Machine.loosingRolls = 0;
-		} else {
-			$.each(Machine.slots, function(i, slot) {
-				var face = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-				console.log("Rolling slot " + i + " to face " + face)
-				slot.show(face, /* delay */ i * 100);
-			});
-			Machine.loosingRolls += 1;
-		}
+	roll: function(winning) {
+		return new RSVP.Promise(function(resolve, reject) {
+			if (winning) {
+				var face = Math.floor(Math.random() * SYMBOLS.length);
+				RSVP.all(Machine.slots.map(function(slot, i) {
+					return slot.show(SYMBOLS[face], /* delay */ i * 100);
+				})).then(resolve).catch(reject);
+			} else {
+				RSVP.all(Machine.slots.map(function(slot, i) {
+					var face = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+					return slot.show(SYMBOLS[face], /* delay */ i * 100);
+				})).then(resolve).catch(reject);
+			}
+		});
 	},
 	reset: function() {
 		$.each(Machine.slots, function(i, slot) { slot.reset(); });
