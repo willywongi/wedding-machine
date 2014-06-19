@@ -17,8 +17,8 @@
 		return setDefault(setDefault(setDefault(this, "_events", {}), evtName, {}), 'subscribers', []);
 	};
 	
-	Eventable.prototype.on = function(evtName, callback, scope) {
-		/* React (callback, scope) to a certain event (evtName).
+	Eventable.prototype.on = function(evtName, callback) {
+		/* React (callback) to a certain event (evtName).
 			Subscribers can alter the flow of the event tampering with the facade:
 			eventable.on('hello', function(e) {
 				e.stopped = 1; // blocks all subsequent subscribers.
@@ -26,11 +26,7 @@
 			});
 		*/
 		var subs = this._getSubs(evtName);
-		if (scope) {
-			subs.push(callback.bind(scope));
-		} else {
-			subs.push(callback);
-		}
+		subs.push(callback);
 	};
 	Eventable.prototype.removeListener = function(evtName, subscriber) {
 		/* Remove the subscriber */
@@ -38,13 +34,15 @@
 		subs.splice(subs.indexOf(subscriber), 1);
 		return this;
 	};
-	Eventable.prototype.once = function(evtName, callback, scope) {
+	Eventable.prototype.once = function(evtName, callback) {
 		/* Just like `on`, but react to the event just once.
 		*/
-		this.on(evtName, function onceCallback() {
-			callback.apply(scope || this, arguments);
-			this.removeListener(evtName, onceCallback);
-		}, this);
+		var self = this,
+			onceCallback = function() {
+				callback.apply(self, arguments);
+				self.removeListener(evtName, onceCallback);
+			};
+		this.on(evtName, onceCallback);
 	};
 	Eventable.prototype.emit = function(evtName /*[args, ...]*/ ) {
 		/* Fire a certain event. Subscribers will be called with 
