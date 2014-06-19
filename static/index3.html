@@ -25,12 +25,38 @@
 <script src="/rsvp.js"></script>
 <script src="/machine.js"></script>
 <script>
+
+var Music = {
+	audio: $('#idle-music')[0],
+	adjustVolume: function(volume) {
+		return new RSVP.Promise(function(resolve, reject) {
+			var alfa = {volume: Music.audio.volume},
+				omega = {volume: volume},
+				tween = new TWEEN.Tween(alfa).to(omega, 750)
+							.onUpdate(function() {
+								Music.audio.volume = this.volume;
+							})
+							.onComplete(resolve)
+							.start();
+		});
+	},
+	mute: function() {
+		return Music.adjustVolume(0);
+	},
+	unmute: function() {
+		return Music.adjustVolume(1);
+	}
+}
+
 $(function() {
 	Machine.startDemo();
-	var music = $('#idle-music')[0];
+	$.post('/open-tray');
+	var music = $('#idle-music')[0],
+		START_PLAY = 83,  // Tasto S
+		ROLL = 65;  // Tasto A  
 	
 	$(document).keyup(function(e) {
-		if (e.which != 83) { // Tasto S
+		if (e.which != START_PLAY) { // Tasto S
 			return;
 		}
 		if (Machine.inGame) {
@@ -38,15 +64,33 @@ $(function() {
 		}
 		Machine.stopDemo().then(function() {
 			// spegne la musica
-			var audio = {volume: music.volume},
-				tween = new TWEEN.Tween(audio)
-					.to({volume: 0}, 750)
-					.onUpdate(function() {
-						music.volume = audio.volume;
-					})
-					.start();
+			Audio.mute();
+			// chiudo il lettore
+			$.post('/close-tray');
+			// Mostra il messaggio (Tira la leva!)		
 			console.log('Pronto per giocare');
 			Machine.inGame = true;
+		});
+	});
+	
+	$(document).keyup(function(e) {
+		if (e.which != ROLL) {
+			return;
+		}
+		if (! Machine.inGame) {
+			return;
+		}
+		var winning = Math.random() > 0.5;  // una volta su due (todo?)
+		Machine.roll(winning).then(function() {
+			if (winning) {
+				console.log('Hai vinto! Tira ancora la leva per rilanciare');
+			} else {
+				console.log('Hai perso! Ritira i tuoi confetti');
+				$.post('/open-tray');
+				Machine.inGame = false;
+				// dopo qualche secondo torna il demo.
+				Machine.startDemo();
+			}
 		});
 	});
 });
