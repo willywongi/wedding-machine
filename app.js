@@ -36,16 +36,19 @@ app.post('/toggle-tray', function(req, res) {
 	// child_process.spawn(command, [args], [options])
 	console.log('asked for toggle tray');
 	var child = child_process.spawn('eject', ['-T']);
+	res.json({response: true});
 });
 
 app.post('/open-tray', function(req, res) {
 	console.log('asked for opening tray');
 	var child = child_process.spawn('eject');
+	res.json({response: true});
 });
 
 app.post('/open-tray', function(req, res) {
 	console.log('asked for closing tray');
 	var child = child_process.spawn('eject' ['-c'] /*TODO: il parametro era -c? */);
+	res.json({response: true});
 });
 
 var server = app.listen(8080);
