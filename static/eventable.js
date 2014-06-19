@@ -43,7 +43,7 @@
 		*/
 		this.on(evtName, function onceCallback() {
 			callback.apply(scope || this, arguments);
-			this.detach(evtName, onceCallback);
+			this.removeListener(evtName, onceCallback);
 		}, this);
 	};
 	Eventable.prototype.emit = function(evtName /*[args, ...]*/ ) {
