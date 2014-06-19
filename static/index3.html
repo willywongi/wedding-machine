@@ -55,6 +55,10 @@ $(function() {
 		START_PLAY = 83,  // Tasto S
 		ROLL = 65;  // Tasto A  
 	
+	RSVP.on('error', function(reason) {
+		console.assert(false, reason);
+	});
+
 	$(document).keyup(function(e) {
 		if (e.which != START_PLAY) { // Tasto S
 			return;
@@ -64,7 +68,7 @@ $(function() {
 		}
 		Machine.stopDemo().then(function() {
 			// spegne la musica
-			Audio.mute();
+			Music.mute();
 			// chiudo il lettore
 			$.post('/close-tray');
 			// Mostra il messaggio (Tira la leva!)		

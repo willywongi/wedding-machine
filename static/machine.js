@@ -137,8 +137,8 @@ Slot.prototype.stopDemo = function() {
 	var slot = this;
 	this.removeListener('rotationEnd', this._demoCallback);
 	return new RSVP.Promise(function(resolve, reject) {
-		console.log('stopping demo mode');
 		slot.once('rotationEnd', resolve);
+		console.log('stopping demo mode');
 	});
 }
 
@@ -151,14 +151,14 @@ var Machine = {
 	roll: function(winning) {
 		return new RSVP.Promise(function(resolve, reject) {
 			if (winning) {
-				var face = Math.floor(Math.random() * SYMBOLS.length);
+				var face = Slot.getRandomFace();
 				RSVP.all(Machine.slots.map(function(slot, i) {
-					return slot.show(SYMBOLS[face], /* delay */ i * 100);
+					return slot.show(face, i * 100);
 				})).then(resolve).catch(reject);
 			} else {
 				RSVP.all(Machine.slots.map(function(slot, i) {
-					var face = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-					return slot.show(SYMBOLS[face], /* delay */ i * 100);
+					var face = Slot.getRandomFace();
+					return slot.show(face, i * 100);
 				})).then(resolve).catch(reject);
 			}
 		});
