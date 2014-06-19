@@ -167,25 +167,17 @@ var Machine = {
 		$.each(Machine.slots, function(i, slot) { slot.reset(); });
 	},
 	startDemo: function() {
+		Machine.emit('startDemo');
 		$.each(Machine.slots, function(i, slot) { slot.startDemo(750 * i); });
 	},
 	stopDemo: function() {
 		return new RSVP.Promise(function(resolve, reject) {
 			RSVP.all(Machine.slots.map(function(slot, i) {
 				return slot.stopDemo();
-			})).then(resolve).catch(reject);
+			})).then(function() { Machine.emit('stopDemo'); })
+				.then(resolve)
+				.catch(reject);
 		});
-// 		var stopSignal = 3,
-// 			stopStatus = 0;
-// 		$.each(Machine.slots, function(i, slot) { 
-// 			slot.stopDemo();
-// 			slot.once('rotationEnd', function(x) {
-// 				stopStatus += i;
-// 				if (i == stopSignal) {
-// 					callback.call(scope || Machine);
-// 				}
-// 			}); 
-// 		});
 	}
 }
 

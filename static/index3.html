@@ -16,7 +16,7 @@
 	</style>
 </head>
 <body>
-<h1>Premi il pulsante per iniziare a giocare!</h1>
+<h1 id="main-message"></h1>
 <audio id="idle-music" src="/idle-music.ogg" loop autoplay></audio>
 <script src="/three.js"></script>
 <script src="/tween.js"></script>
@@ -27,37 +27,58 @@
 <script>
 
 var Music = {
-	audio: $('#idle-music')[0],
-	adjustVolume: function(volume) {
-		return new RSVP.Promise(function(resolve, reject) {
-			var alfa = {volume: Music.audio.volume},
-				omega = {volume: volume},
-				tween = new TWEEN.Tween(alfa).to(omega, 750)
-							.onUpdate(function() {
-								Music.audio.volume = this.volume;
-							})
-							.onComplete(resolve)
-							.start();
-		});
+		audio: $('#idle-music')[0],
+		adjustVolume: function(volume) {
+			return new RSVP.Promise(function(resolve, reject) {
+				var alfa = {volume: Music.audio.volume},
+					omega = {volume: volume},
+					tween = new TWEEN.Tween(alfa).to(omega, 750)
+								.onUpdate(function() {
+									Music.audio.volume = this.volume;
+								})
+								.onComplete(resolve)
+								.start();
+			});
+		},
+		mute: function() {
+			return Music.adjustVolume(0);
+		},
+		unmute: function() {
+			return Music.adjustVolume(1);
+		}
 	},
-	mute: function() {
-		return Music.adjustVolume(0);
-	},
-	unmute: function() {
-		return Music.adjustVolume(1);
+	MESSAGES = {
+		'idle-state': "Premi il pulsante per iniziare a giocare!",
+		'start-gaming': "Tira la leva per giocare!",
+		'winning': "Hai vinto, tira ancora la leva per rilanciare!",
+		'losing': "Hai perso, ritira i tuoi confetti!"
 	}
-}
 
 $(function() {
-	Machine.startDemo();
-	$.post('/open-tray');
 	var music = $('#idle-music')[0],
+		message = $('#main-message'),
 		START_PLAY = 83,  // Tasto S
 		ROLL = 65;  // Tasto A  
 	
 	RSVP.on('error', function(reason) {
 		console.assert(false, reason);
 	});
+	
+	Machine.on('startDemo', function() {
+		message.html(MESSAGES['idle-state']);
+	});
+	Machine.on('startGame', function() {
+		message.html(MESSAGES['start-gaming']);
+	});
+	Machine.on('playerWin', function() {
+		message.html(MESSAGES['winning']);
+	});
+	Machine.on('playerLoose', function() {
+		message.html(MESSAGES['loosing']);
+	});
+	// init it all
+	Machine.startDemo();
+	$.post('/open-tray');
 
 	$(document).keyup(function(e) {
 		if (e.which != START_PLAY) { // Tasto S
@@ -72,7 +93,7 @@ $(function() {
 			// chiudo il lettore
 			$.post('/close-tray');
 			// Mostra il messaggio (Tira la leva!)		
-			console.log('Pronto per giocare');
+			Machine.emit('startGame');
 			Machine.inGame = true;
 		});
 	});
@@ -84,16 +105,22 @@ $(function() {
 		if (! Machine.inGame) {
 			return;
 		}
-		var winning = Math.random() > 0.5;  // una volta su due (todo?)
+		var winning = Math.random() > 0.4;  // una volta su due (todo?)
 		Machine.roll(winning).then(function() {
 			if (winning) {
-				console.log('Hai vinto! Tira ancora la leva per rilanciare');
+				console.log('Il giocatore vince');
+				Machine.emit('playerWin');
 			} else {
-				console.log('Hai perso! Ritira i tuoi confetti');
+				console.log('Il giocatore perde');
+				Machine.emit('playerLoose');
 				$.post('/open-tray');
 				Machine.inGame = false;
+				Music.unmute();
 				// dopo qualche secondo torna il demo.
-				Machine.startDemo();
+				window.setTimeout(3000, function() {
+					Machine.startDemo();
+				});
+				
 			}
 		});
 	});
