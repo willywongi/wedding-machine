@@ -12,6 +12,9 @@ app.get('/', function(req, res) {
 app.get('/slot.png', function(req, res) {
 	res.sendfile('static/slot-opaque.png');
 });
+app.get('/AG-Stencil.ttf', function(req, res) {
+	res.sendfile('static/AG-Stencil.ttf');
+});
 app.get('/idle-music.ogg', function(req, res) {
 	res.sendfile('static/idle-music3.ogg');
 });
