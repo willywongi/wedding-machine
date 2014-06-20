@@ -7,7 +7,7 @@
 	background-color: #000;
 	}
 	@font-face {
-		font-family: 'FontAwesome';
+		font-family: 'Stencil';
 		src: url('/AG-Stencil.ttf') format('truetype');
 		font-weight: normal;
 		font-style: normal;
@@ -17,14 +17,43 @@
 		width: 640px; height: 480px;
 		position: absolute;
 		left: 50%;
+		top: 50%;
 		margin-left: -320px;
+		margin-top: -240px;
 	}
 	h1 { color: #fff; text-align: center; }
+	.message {
+		width: 640px; height: 480px;
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		margin-left: -320px;
+		margin-top: -240px;
+		opacity: 0;
+		transition: opacity 1s;
+		font-family: Stencil;
+	}
+	.message.visible {
+		opacity: 1;
+	}
 	
+	#start-game-arrow { font-size: 56px; }
 	</style>
 </head>
 <body>
-<h1 id="main-message"></h1>
+<h1 class="message" id="start-game-message">
+	Premi il pulsante per iniziare a giocare!
+	<i id="start-game-arrow" class="fa fa-arrow-down"></i>
+</h1>
+
+<h1 class="message" id="winning-message">
+	Vincita! Tira ancora la leva per rilanciare!
+</h1>
+
+<h1 class="message" id="loosing-message">
+	Game Over! Ritira i tuoi confetti!
+</h1>
+
 <audio id="idle-music" src="/idle-music.ogg" loop autoplay></audio>
 <script src="/three.js"></script>
 <script src="/tween.js"></script>
@@ -55,16 +84,15 @@ var Music = {
 			return Music.adjustVolume(1);
 		}
 	},
-	MESSAGES = {
-		'idle-state': "Premi il pulsante per iniziare a giocare!",
-		'start-gaming': "Tira la leva per giocare!",
-		'winning': "Hai vinto, tira ancora la leva per rilanciare!",
-		'losing': "Hai perso, ritira i tuoi confetti!"
-	}
+	Message: {
+		show: function(message) {
+			$('.message').removeClass('visible');
+			$('#' + message).addClass('visible');
+		}
+	};
 
 $(function() {
 	var music = $('#idle-music')[0],
-		message = $('#main-message'),
 		START_PLAY = 83,  // Tasto S
 		ROLL = 65;  // Tasto A  
 	
@@ -72,20 +100,20 @@ $(function() {
 		console.assert(false, reason);
 	});
 	
-	Machine.on('startDemo', function() {
-		message.html(MESSAGES['idle-state']);
+	Machine.on('endGame', function() {
+		Message.show('start-game-message');
 	});
 	Machine.on('startGame', function() {
-		message.html(MESSAGES['start-gaming']);
+		//
 	});
 	Machine.on('playerWin', function() {
-		message.html(MESSAGES['winning']);
+		Message.show('winning-message');
 	});
 	Machine.on('playerLoose', function() {
-		message.html(MESSAGES['loosing']);
+		Message.show('loosing-message');
 	});
 	// init it all
-	Machine.startDemo();
+	Message.show('start-game-message');
 	$.post('/open-tray');
 
 	$(document).keyup(function(e) {
@@ -95,12 +123,13 @@ $(function() {
 		if (Machine.inGame) {
 			return;
 		}
+		if (! Machine.
+		
 		Machine.stopDemo().then(function() {
 			// spegne la musica
 			Music.mute();
 			// chiudo il lettore
 			$.post('/close-tray');
-			// Mostra il messaggio (Tira la leva!)		
 			Machine.emit('startGame');
 			Machine.inGame = true;
 		});
@@ -126,9 +155,8 @@ $(function() {
 				Music.unmute();
 				// dopo qualche secondo torna il demo.
 				window.setTimeout(3000, function() {
-					Machine.startDemo();
+					Machine.emit('endGame');
 				});
-				
 			}
 		});
 	});
