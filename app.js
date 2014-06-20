@@ -50,7 +50,7 @@ app.post('/open-tray', function(req, res) {
 	res.json({response: true});
 });
 
-app.post('/open-tray', function(req, res) {
+app.post('/close-tray', function(req, res) {
 	console.log('asked for closing tray');
 	var child = child_process.spawn('eject' ['-c'] /*TODO: il parametro era -c? */);
 	res.json({response: true});
