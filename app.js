@@ -4,6 +4,8 @@ var	// http://expressjs.com/guide.html
 	child_process = require('child_process'),
 	app = express();
 
+app.use('/font', express.static(__dirname + '/bower_components/fontawesome'));
+
 app.get('/', function(req, res) {
 	res.sendfile('static/index3.html');
 });
