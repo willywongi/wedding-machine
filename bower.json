@@ -2,8 +2,8 @@
   "name": "wedding-machine",
   "dependencies": {
     "jquery": "http://code.jquery.com/jquery-2.1.1.min.js",
-    "tweenjs": "https://cdn.rawgit.com/sole/tween.js/a5ca833e3bda8ee1f629ea8e0cb34a387b420fd0/build/tween.min.js",
-    "threejs": "https://cdn.rawgit.com/mrdoob/three.js/a083e4442732f076e85446ca42e5f7a829b7d28b/build/three.min.js",
+    "tweenjs": "https://cdn.jsdelivr.net/gh/sole/tween.js@a5ca833e3bda8ee1f629ea8e0cb34a387b420fd0/build/tween.min.js",
+    "threejs": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a083e4442732f076e85446ca42e5f7a829b7d28b/build/three.min.js",
     "rsvp": "~3.0.8",
     "fontawesome": "~4.1.0"
   }
